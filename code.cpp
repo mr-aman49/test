@@ -1,93 +1,98 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
 
-#define MAX_NEWSPAPERS 5
+float t;
 
-typedef struct {
-char *name;
-double price[7];
-} Newspaper;
+struct NewsPaperData {
+  int paperid;
+  float price[7];
+  float weaklyPrice = 0;
+};
 
-typedef struct {
-Newspaper *newspapers[MAX_NEWSPAPERS];
-int count;
-} NewspaperList;
+void calculateBudget(struct NewsPaperData toi, struct NewsPaperData hindu,
+                     struct NewsPaperData et, struct NewsPaperData bm,
+                     struct NewsPaperData ht) {
+  for (int i = 0; i < 7; i++) {
+    toi.weaklyPrice += toi.price[i];
+  }
+  for (int i = 0; i < 7; i++) {
+    hindu.weaklyPrice += hindu.price[i];
+  }
+  for (int i = 0; i < 7; i++) {
+    et.weaklyPrice += et.price[i];
+  }
+  for (int i = 0; i < 7; i++) {
+    bm.weaklyPrice += bm.price[i];
+  }
+  for (int i = 0; i < 7; i++) {
+    ht.weaklyPrice += ht.price[i];
+  }
 
-NewspaperList *init_newspaper_list() {
-NewspaperList *list = (NewspaperList *)malloc(sizeof(NewspaperList));
-list->count = 0;
-return list;
+  float arr[5];
+
+  arr[0] = toi.weaklyPrice;
+  arr[1] = hindu.weaklyPrice;
+  arr[2] = et.weaklyPrice;
+  arr[3] = bm.weaklyPrice;
+  arr[4] = ht.weaklyPrice;
+
+  int n = sizeof(arr) / sizeof(int);
+  sort(arr, arr + n);
+
+  float m = 0;
+  int maxnum = 0;
+      vector<std::string> elements;
+
+  for (int i = 0; i < n; i++) {
+    float currSum = 0;
+    int num = 0;
+    for (int j = i; j < n; j++) {
+      currSum += arr[j];
+      num++;
+      if (currSum > m && currSum <= t && num >= maxnum) {
+        m = currSum;
+        maxnum = num;
+        switch (j) {
+        case 0:
+          elements.push_back("toi");
+        case 1:
+          elements.push_back("hindu");
+        case 2:
+          elements.push_back("et");
+        case 3:
+          elements.push_back("bm");
+        case 4:
+          elements.push_back("ht");
+        }
+      }
+    }
+  }
+  cout<<"{";
+  for(int i=elements.size();i>=elements.size()-maxnum;i--){
+    cout<<elements[i]<<" ";
+  }
+  cout<<"}"<<endl;
+  cout << m;
+
+  // cout << toi.weaklyPrice << endl
+  //      << hindu.weaklyPrice << endl
+  //      << et.weaklyPrice << endl
+  //      << bm.weaklyPrice << endl
+  //      << ht.weaklyPrice;
 }
 
-void add_newspaper(NewspaperList *list, Newspaper *newspaper) {
-if (list->count == MAX_NEWSPAPERS) {
-printf("Error: cannot add more newspapers to list.\n");
-return;
-}
+int main() {
 
-list->newspapers[list->count] = newspaper;
-list->count++;
-}
+  struct NewsPaperData toi = {1, {3, 3, 3, 3, 3, 5, 6}};
+  struct NewsPaperData hindu = {2, {2.5, 2.5, 2.5, 2.5, 2.5, 4, 4}};
+  struct NewsPaperData et = {3, {4, 4, 4, 4, 4, 4, 10}};
+  struct NewsPaperData bm = {4, {1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5}};
+  struct NewsPaperData ht = {5, {2, 2, 2, 2, 2, 4, 4}};
 
-typedef struct {
-Newspaper *newspaper;
-int days[7];
-double cost;
-} Subscription;
+  cout << "Weekly Budget: ";
+  cin >> t;
 
-Subscription *init_subscription(Newspaper *newspaper) {
-Subscription *sub = (Subscription *)malloc(sizeof(Subscription));
-sub->newspaper = newspaper;
-memset(sub->days, 0, 7 * sizeof(int));
-sub->cost = 0.0;
-return sub;
-}
-
-void add_day(Subscription *sub, int day) {
-if (day < 0 || day > 6) {
-printf("Error: invalid day %d\n", day);
-return;
-}
-
-sub->days[day] = 1;
-sub->cost += sub->newspaper->price[day];
-}
-
-typedef struct {
-Subscription *subscriptions[MAX_NEWSPAPERS];
-int count;
-double cost;
-} SubscriptionList;
-
-SubscriptionList *init_subscription_list() {
-SubscriptionList *list = (SubscriptionList *)malloc(sizeof(SubscriptionList));
-list->count = 0;
-list->cost = 0.0;
-return list;
-}
-
-void add_subscription(SubscriptionList *list, Subscription *sub) {
-if (list->count == MAX_NEWSPAPERS) {
-printf("Error: cannot add more subscriptions to list.\n");
-return;
-}
-
-list->subscriptions[list->count] = sub;
-list->count++;
-list->cost += sub->cost;
-}
-
-void print_subscription_list(SubscriptionList *list) {
-for (int i = 0; i < list->count; i++) {
-Subscription *sub = list->subscriptions[i];
-printf("%s: ", sub->newspaper->name);
-for (int j = 0; j < 7; j++) {
-if (sub->days[j]) {
-printf("%d ", j);
-}
-}
-printf("(%.2lf)\n", sub->cost);
-}
-printf("Total cost: %.2lf\n", list->cost);
+  calculateBudget(toi, hindu, et, bm, ht);
 }
